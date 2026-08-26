@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>搜商 · 宋秀强</title>
+  <meta name="description" content="《搜商》—— 面对未知时寻找答案的能力。作者：宋秀强">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            navy: { 50: '#ebf0f5', 100: '#d6e0eb', 200: '#adc2d9', 300: '#84a3c7', 400: '#5b84b5', 500: '#3b5b7f', 600: '#1e3a5f', 700: '#15293f', 800: '#0f1f30', 900: '#0a1521' },
+            gold: { DEFAULT: '#b8860b', light: '#d4a843', dark: '#8b6508' },
+            ink: { DEFAULT: '#111827', light: '#4b5563', muted: '#6b7280' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/custom.css">
+  <script src="assets/js/chapters.js"></script>
+  <script src="assets/js/author.js"></script>
+  <script src="assets/js/app.js"></script>
+</head>
+<body class="bg-white text-ink transition-colors duration-300" x-data="homeApp()" x-init="init()">
+
+  <!-- ============ 顶部导航 ============ -->
+  <nav class="sticky top-0 z-50 backdrop-blur-md bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-10 h-12 bg-navy-600 rounded flex items-center justify-center">
+          <span class="text-white font-bold text-sm" style="font-family:'Noto Serif SC',serif">搜</span>
+        </div>
+        <span class="text-xl font-bold text-navy-600 dark:text-navy-200" style="font-family:'Noto Serif SC',serif">搜商</span>
+      </a>
+      <div class="flex items-center gap-4">
+        <button @click="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="切换主题">
+          <svg x-show="theme==='light'" class="w-5 h-5 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          <svg x-show="theme==='dark'" class="w-5 h-5 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        </button>
+        <a href="read.html?chapter=00" class="px-5 py-2 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition-colors text-sm font-medium">
+          开始阅读
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ 英雄区 ============ -->
+  <header class="relative overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute top-10 right-10 w-96 h-96 bg-navy-50 dark:bg-navy-800/20 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 py-16 md:py-24">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <!-- 左侧：书籍封面 -->
+        <div class="flex justify-center md:justify-end">
+          <img src="assets/images/cover.png" alt="《搜商》封面" class="book-cover w-64 md:w-80 rounded-lg">
+        </div>
+
+        <!-- 右侧：书名和 CTA -->
+        <div class="text-center md:text-left">
+          <div class="inline-block px-3 py-1 bg-navy-50 dark:bg-navy-800/30 text-navy-600 dark:text-navy-200 rounded text-xs font-medium mb-6 tracking-wider">
+            SEARCH QUOTIENT
+          </div>
+          <h1 class="text-6xl md:text-7xl font-bold text-navy-600 dark:text-navy-200 mb-4" style="font-family:'Noto Serif SC',serif; letter-spacing:0.05em">
+            搜商
+          </h1>
+          <div class="w-16 h-1 bg-gold mb-6 mx-auto md:mx-0"></div>
+          <p class="text-lg md:text-xl text-ink dark:text-slate-200 mb-3 leading-relaxed font-medium">
+            真正决定一个人上限的，<br>
+            不是他知道多少，而是当他不知道的时候，<br>
+            他有没有办法找到答案。
+          </p>
+          <p class="text-sm text-ink-muted dark:text-slate-400 mb-8">
+            宋秀强 · 著
+          </p>
+          <div class="flex flex-col sm:flex-row gap-3 justify-center md:justify-start items-center">
+            <button @click="startReading()" class="px-8 py-3 bg-navy-600 text-white rounded-xl hover:bg-navy-700 transition-all hover:scale-105 shadow-lg shadow-navy-600/20 font-medium">
+              开始阅读
+            </button>
+            <button x-show="continueChapter" @click="continueReading()" class="px-8 py-3 bg-white dark:bg-slate-800 text-navy-600 dark:text-navy-200 rounded-xl hover:bg-navy-50 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700 font-medium">
+              继续阅读
+            </button>
+            <a href="#author" class="px-8 py-3 text-ink dark:text-slate-300 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all font-medium">
+              关于作者
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ 核心理念 ============ -->
+  <section class="max-w-3xl mx-auto px-6 py-16">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 md:p-12 shadow-sm border border-slate-200 dark:border-slate-700">
+      <h2 class="text-2xl font-bold text-navy-600 dark:text-navy-200 mb-6">这本书讲什么</h2>
+      <div class="space-y-4 text-ink dark:text-slate-200 leading-relaxed" style="font-family:'Noto Serif SC',serif">
+        <p>这个时代，越来越多的人正在陷入一种说不清的焦虑——学的东西太多，不知道该学什么；看的信息太多，不知道该信什么；机会就在眼前，不知道怎么抓住。</p>
+        <p>这本书把这种焦虑叫做「答案焦虑」。而真正能让人走出来的，不是更多的知识，而是一种能力：<strong class="text-navy-600 dark:text-navy-200 font-bold">面对未知，依然有办法。</strong></p>
+        <p>这就是搜商——发现问题、定义问题、寻找信息、判断信息、整合信息，并把信息转化为行动和结果的综合能力。</p>
+      </div>
+      <div class="mt-8 pl-4 border-l-4 border-gold bg-slate-50 dark:bg-slate-700/50 py-4 pr-4 rounded-r-lg">
+        <p class="text-navy-600 dark:text-navy-200 italic font-medium" style="font-family:'Noto Serif SC',serif">
+          愿你永远不知道所有答案，但永远知道如何找到答案。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 金句墙 ============ -->
+  <section class="max-w-6xl mx-auto px-6 py-16">
+    <h2 class="text-3xl font-bold text-center text-navy-600 dark:text-navy-200 mb-12">书中金句</h2>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <template x-for="(quote, i) in QUOTES" :key="i">
+        <div class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all hover:-translate-y-1">
+          <div class="text-gold text-4xl mb-2 leading-none" style="font-family:'Noto Serif SC',serif">"</div>
+          <p class="text-ink dark:text-slate-200 leading-relaxed" style="font-family:'Noto Serif SC',serif" x-text="quote"></p>
+        </div>
+      </template>
+    </div>
+  </section>
+
+  <!-- ============ 目录导航 ============ -->
+  <section class="max-w-6xl mx-auto px-6 py-16">
+    <h2 class="text-3xl font-bold text-center text-navy-600 dark:text-navy-200 mb-4">目录</h2>
+    <p class="text-center text-ink-muted dark:text-slate-400 mb-12">共 42 篇 · 序言 + 40 章 + 终章</p>
+
+    <div class="space-y-8">
+      <template x-for="(partName, partIdx) in Object.keys(groupedChapters)" :key="partName">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 dark:border-slate-700">
+          <h3 class="text-xl font-bold text-navy-600 dark:text-navy-200 mb-5 pb-3 border-b border-slate-200 dark:border-slate-700" x-text="partName"></h3>
+          <div class="grid md:grid-cols-2 gap-3">
+            <template x-for="ch in groupedChapters[partName]" :key="ch.id">
+              <button @click="goToChapter(ch.id)" class="flex items-start gap-3 p-3 rounded-lg hover:bg-navy-50 dark:hover:bg-slate-700 transition-colors text-left group">
+                <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-navy-50 dark:bg-navy-800/30 text-navy-600 dark:text-navy-200 rounded-lg text-sm font-semibold group-hover:bg-navy-600 group-hover:text-white transition-colors" x-text="ch.id"></span>
+                <span class="text-ink dark:text-slate-200 group-hover:text-navy-600 dark:group-hover:text-navy-200 transition-colors text-sm leading-relaxed" x-text="ch.title"></span>
+              </button>
+            </template>
+          </div>
+        </div>
+      </template>
+    </div>
+  </section>
+
+  <!-- ============ 作者区 ============ -->
+  <section id="author" class="max-w-4xl mx-auto px-6 py-16">
+    <div class="bg-gradient-to-br from-navy-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-2xl p-8 md:p-12 shadow-sm border border-navy-100 dark:border-slate-700">
+      <div class="flex flex-col md:flex-row gap-8 items-start">
+        <div class="flex-shrink-0 w-24 h-24 bg-navy-600 rounded-2xl flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+          宋
+        </div>
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold text-navy-600 dark:text-navy-200 mb-1" x-text="AUTHOR.name"></h2>
+          <p class="text-ink-light dark:text-slate-300 mb-4" x-text="AUTHOR.title"></p>
+          <p class="text-ink dark:text-slate-200 leading-relaxed mb-6" style="font-family:'Noto Serif SC',serif" x-text="AUTHOR.bio"></p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <template x-for="(stat, i) in AUTHOR.stats" :key="i">
+              <div class="text-center p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                <div class="text-2xl font-bold text-navy-600 dark:text-navy-200" x-text="stat.value"></div>
+                <div class="text-xs text-ink-muted dark:text-slate-400 mt-1" x-text="stat.label"></div>
+              </div>
+            </template>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-ink-muted dark:text-slate-400 mb-3 uppercase tracking-wider">其他著作</h3>
+            <div class="space-y-2">
+              <template x-for="(book, i) in AUTHOR.otherBooks" :key="i">
+                <a :href="book.url" target="_blank" rel="noopener" class="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-lg hover:bg-navy-50 dark:hover:bg-slate-700 transition-colors group border border-slate-100 dark:border-slate-700">
+                  <svg class="w-5 h-5 text-navy-600 dark:text-navy-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.252v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.252v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.252m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.252v13c-1.168-.773-2.754-1.252-4.5-1.252-1.746 0-3.332.479-4.5 1.252"/></svg>
+                  <div class="flex-1">
+                    <div class="font-medium text-ink dark:text-slate-100 group-hover:text-navy-600 dark:group-hover:text-navy-200 transition-colors" x-text="book.title"></div>
+                    <div class="text-xs text-ink-muted dark:text-slate-400" x-text="book.desc"></div>
+                  </div>
+                  <svg class="w-4 h-4 text-slate-400 group-hover:text-navy-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 页脚 ============ -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 mt-16 bg-slate-50 dark:bg-slate-900">
+    <div class="max-w-6xl mx-auto px-6 py-10 text-center">
+      <p class="text-navy-600 dark:text-navy-200 text-xl font-bold mb-2" style="font-family:'Noto Serif SC',serif">搜商</p>
+      <p class="text-ink-muted dark:text-slate-400 text-sm">宋秀强 · 著</p>
+      <div class="w-12 h-0.5 bg-gold mx-auto my-4"></div>
+      <p class="text-ink-muted dark:text-slate-500 text-sm italic" style="font-family:'Noto Serif SC',serif">愿你永远不知道所有答案，但永远知道如何找到答案。</p>
+    </div>
+  </footer>
+
+</body>
+</html>
