@@ -1,0 +1,340 @@
+/* ============================================
+   《搜商》阅读网站 - 自定义补充样式 v2
+   商务风格 · 高对比度 · 深藏青配色
+   ============================================ */
+
+/* ---------- 基础 ---------- */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- 阅读正文排版 ---------- */
+.article-content {
+  font-family: "Noto Serif SC", "Source Han Serif SC", "思源宋体", "SimSun", serif;
+  font-size: 18px;
+  line-height: 1.9;
+  color: #111827;
+  word-break: break-word;
+}
+
+.article-content.font-size-small { font-size: 16px; }
+.article-content.font-size-medium { font-size: 18px; }
+.article-content.font-size-large { font-size: 20px; }
+
+/* 标题 */
+.article-content h1 {
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  color: #1e3a5f;
+  letter-spacing: -0.02em;
+}
+
+.article-content h2 {
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
+  color: #111827;
+  scroll-margin-top: 80px;
+}
+
+.article-content h3 {
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #111827;
+  scroll-margin-top: 80px;
+}
+
+.article-content h4 {
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #111827;
+  scroll-margin-top: 80px;
+}
+
+/* 段落 */
+.article-content p {
+  margin-top: 0;
+  margin-bottom: 1.5em;
+  text-align: justify;
+  color: #111827;
+}
+
+/* 金句 / 引用 — 商务风格：深藏青文字 + 金色边框 */
+.article-content blockquote {
+  margin: 2rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid #b8860b;
+  background: #f8f9fa;
+  border-radius: 0 8px 8px 0;
+  color: #1e3a5f;
+  font-style: italic;
+  font-size: 1.05em;
+  line-height: 1.8;
+}
+
+.article-content blockquote p {
+  margin-bottom: 0;
+  color: #1e3a5f;
+}
+
+/* 列表 */
+.article-content ul,
+.article-content ol {
+  margin-top: 0;
+  margin-bottom: 1.5em;
+  padding-left: 1.5em;
+  color: #111827;
+}
+
+.article-content li {
+  margin-bottom: 0.5em;
+  color: #111827;
+}
+
+.article-content ul li {
+  list-style-type: disc;
+}
+
+.article-content ol li {
+  list-style-type: decimal;
+}
+
+/* 强调 — 深藏青，高对比度 */
+.article-content strong {
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.article-content em {
+  font-style: italic;
+  color: #111827;
+}
+
+/* 分隔线 */
+.article-content hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #d1d5db, transparent);
+  margin: 3rem 0;
+}
+
+/* 行内代码 */
+.article-content code {
+  font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  font-size: 0.9em;
+  background: #f3f4f6;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  color: #b8860b;
+}
+
+/* 代码块 */
+.article-content pre {
+  background: #1e293b;
+  color: #f1f5f9;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.article-content pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+/* 链接 — 深藏青 */
+.article-content a {
+  color: #1e3a5f;
+  text-decoration: underline;
+  text-decoration-color: #b8860b;
+  text-underline-offset: 3px;
+  transition: all 0.2s;
+}
+
+.article-content a:hover {
+  color: #15293f;
+  text-decoration-color: #d4a843;
+}
+
+/* ---------- 暗色主题 ---------- */
+.theme-dark .article-content {
+  color: #f1f5f9;
+}
+
+.theme-dark .article-content h1 {
+  color: #60a5fa;
+}
+
+.theme-dark .article-content h2,
+.theme-dark .article-content h3,
+.theme-dark .article-content h4 {
+  color: #f1f5f9;
+}
+
+.theme-dark .article-content p,
+.theme-dark .article-content li {
+  color: #f1f5f9;
+}
+
+.theme-dark .article-content blockquote {
+  background: #1e293b;
+  border-left-color: #d4a843;
+  color: #93c5fd;
+}
+
+.theme-dark .article-content blockquote p {
+  color: #93c5fd;
+}
+
+.theme-dark .article-content strong {
+  color: #60a5fa;
+}
+
+.theme-dark .article-content em {
+  color: #e2e8f0;
+}
+
+.theme-dark .article-content code {
+  background: #334155;
+  color: #d4a843;
+}
+
+.theme-dark .article-content hr {
+  background: linear-gradient(to right, transparent, #475569, transparent);
+}
+
+.theme-dark .article-content a {
+  color: #60a5fa;
+  text-decoration-color: #d4a843;
+}
+
+/* ---------- 沉浸式模式 ---------- */
+.immersive-mode .article-content {
+  font-size: 19px;
+  line-height: 2;
+}
+
+/* ---------- 滚动条美化 ---------- */
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.theme-dark .custom-scroll::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.theme-dark .custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* ---------- 选中文本 ---------- */
+::selection {
+  background: #1e3a5f;
+  color: #ffffff;
+}
+
+.theme-dark ::selection {
+  background: #60a5fa;
+  color: #0f172a;
+}
+
+/* ---------- 动画 ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* ---------- 进度条 ---------- */
+.progress-bar {
+  transition: width 0.1s linear;
+}
+
+/* ---------- 章节项激活态 ---------- */
+.chapter-item-active {
+  background: #ebf0f5;
+  color: #1e3a5f;
+  border-left: 3px solid #1e3a5f;
+  font-weight: 600;
+}
+
+.theme-dark .chapter-item-active {
+  background: #1e293b;
+  color: #60a5fa;
+  border-left-color: #60a5fa;
+}
+
+/* ---------- 书籍封面 ---------- */
+.book-cover {
+  box-shadow: 0 20px 60px -10px rgba(30, 58, 95, 0.4), 0 8px 20px -5px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.book-cover:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 25px 70px -10px rgba(30, 58, 95, 0.5), 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* ---------- 移动端调整 ---------- */
+@media (max-width: 768px) {
+  .article-content {
+    font-size: 16px;
+  }
+  .article-content.font-size-small { font-size: 14px; }
+  .article-content.font-size-medium { font-size: 16px; }
+  .article-content.font-size-large { font-size: 18px; }
+  .article-content h1 { font-size: 1.5rem; }
+  .article-content h2 { font-size: 1.25rem; }
+  .article-content h3 { font-size: 1.1rem; }
+}

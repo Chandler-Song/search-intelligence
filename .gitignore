@@ -1,0 +1,28 @@
+# Python 缓存与脚本
+__pycache__/
+*.pyc
+*.pyo
+*.py
+gen_cover.py
+test_*.py
+verify_*.py
+
+# 临时文件
+server_log.txt
+*.log
+NUL
+*.tmp
+
+# 系统文件
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 服务器进程
+*.pid
