@@ -1,335 +1,280 @@
-/* ============================================
-   《搜商》阅读网站 - 主应用逻辑 (Alpine.js)
-   ============================================ */
+// app.js - 《搜商》Alpine.js 组件
+// fetch 路径前缀: 'bookcreater/'
 
-function readingApp() {
+function bookApp() {
   return {
-    // ---------- 状态 ----------
-    currentChapterId: "00",
+    view: 'home',
     currentChapter: null,
-    chapterContent: "",
-    isLoading: true,
-    loadError: false,
+    currentHtml: '',
+    chapterCache: {},
+    fontSize: 14,
+    theme: 'light',
+    sidebarOpen: false,
+    sidebarShow: false,
+    progress: 0,
+    loading: false,
+    error: null,
+    lastChapter: null,
+    immersive: false,
+    moreOpen: false,
+    parts: (typeof PARTS !== 'undefined') ? PARTS : [],
+    chapters: (typeof CHAPTERS !== 'undefined') ? CHAPTERS : [],
+    _scrollScheduled: false,
+    _revealObserver: null,
 
-    // 布局
-    sidebarOpen: true,
-    tocOpen: true,
-    immersiveMode: false,
-    mobileSidebarOpen: false,
-    settingsOpen: false,
-
-    // 主题与字号
-    theme: "light", // light | dark
-    fontSize: "medium", // small | medium | large
-
-    // 进度
-    readProgress: 0,
-
-    // TOC
-    tocItems: [],
-    activeTocId: "",
-
-    // 缓存
-    cache: {},
-
-    // ---------- 初始化 ----------
     init() {
-      this.theme = localStorage.getItem("sq-theme") || "light";
-      this.fontSize = localStorage.getItem("sq-fontsize") || "medium";
-      const saved = localStorage.getItem("sq-current-chapter");
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlChapter = urlParams.get("chapter");
-      this.currentChapterId = urlChapter || saved || "00";
+      this.theme = localStorage.getItem('book-theme') || 'light';
+      const savedSize = parseInt(localStorage.getItem('book-fontsize'));
+      this.fontSize = (isNaN(savedSize)) ? 14 : Math.min(20, Math.max(10, savedSize));
+      this.lastChapter = localStorage.getItem('book-lastchapter') || null;
+      this.immersive = localStorage.getItem('book-immersive') === '1';
 
-      this.applyTheme();
-      this.loadChapter(this.currentChapterId);
-      this.setupKeyboard();
+      if (this.theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+
+      window.addEventListener('hashchange', () => this.handleHash());
+      window.addEventListener('scroll', () => this.onScroll(), { passive: true });
+      window.addEventListener('keydown', (e) => this.onKeydown(e));
+
+      this.handleHash();
+      this.$nextTick(() => this.initReveal());
     },
 
-    // ---------- 章节加载 ----------
+    initReveal() {
+      const targets = document.querySelectorAll('.reveal, .reveal-group');
+      if (!targets.length) return;
+      if (!('IntersectionObserver' in window)) {
+        targets.forEach(el => el.classList.add('reveal-visible'));
+        return;
+      }
+      this._revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-visible');
+            this._revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+      targets.forEach(el => this._revealObserver.observe(el));
+    },
+
+    replayChapterAnim() {
+      this.$nextTick(() => {
+        const el = document.querySelector('.markdown');
+        if (!el) return;
+        el.classList.remove('chapter-enter');
+        void el.offsetWidth;
+        el.classList.add('chapter-enter');
+      });
+    },
+
+    get currentChapterMeta() {
+      return this.chapters.find(c => c.id === this.currentChapter) || null;
+    },
+    get prevChapterMeta() {
+      if (!this.currentChapter) return null;
+      const idx = this.chapters.findIndex(c => c.id === this.currentChapter);
+      return idx > 0 ? this.chapters[idx - 1] : null;
+    },
+    get nextChapterMeta() {
+      if (!this.currentChapter) return null;
+      const idx = this.chapters.findIndex(c => c.id === this.currentChapter);
+      return idx >= 0 && idx < this.chapters.length - 1 ? this.chapters[idx + 1] : null;
+    },
+
+    chaptersByPart(partId) {
+      return this.chapters.filter(c => c.part === partId);
+    },
+
+    handleHash() {
+      const hash = location.hash;
+      const m = hash.match(/^#\/ch\/(\d{2})$/);
+      if (m) {
+        this.loadChapter(m[1]);
+      } else {
+        this.view = 'home';
+        this.currentChapter = null;
+        window.scrollTo(0, 0);
+      }
+    },
+
+    goHome() {
+      location.hash = '';
+    },
+
+    openChapter(id) {
+      location.hash = '#/ch/' + id;
+    },
+
     async loadChapter(id) {
-      const chapter = CHAPTERS.find(c => c.id === id);
-      if (!chapter) return;
-
-      this.currentChapterId = id;
-      this.currentChapter = chapter;
-      this.isLoading = true;
-      this.loadError = false;
-      this.tocItems = [];
-      this.readProgress = 0;
-
-      localStorage.setItem("sq-current-chapter", id);
-      this.updateUrl();
-
-      // 缓存命中
-      if (this.cache[id]) {
-        this.chapterContent = this.cache[id];
-        this.isLoading = false;
-        this.$nextTick(() => this.afterRender());
+      const meta = this.chapters.find(c => c.id === id);
+      if (!meta) {
+        this.error = '未找到章节 ' + id;
         return;
       }
 
+      this.view = 'read';
+      this.currentChapter = id;
+      this.error = null;
+      this.sidebarOpen = false;
+      this.sidebarShow = false;
+      window.scrollTo(0, 0);
+      this.progress = 0;
+
+      localStorage.setItem('book-lastchapter', id);
+      this.lastChapter = id;
+
+      if (this.chapterCache[id]) {
+        this.currentHtml = this.chapterCache[id];
+        this.loading = false;
+        this.replayChapterAnim();
+        this.$nextTick(() => window.scrollTo(0, 0));
+        return;
+      }
+
+      this.loading = true;
       try {
-        const resp = await fetch(chapter.file);
-        if (!resp.ok) throw new Error("加载失败");
+        const resp = await fetch('bookcreater/' + meta.file);
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const text = await resp.text();
-        const html = DOMPurify.sanitize(marked.parse(text));
-        this.cache[id] = html;
-        this.chapterContent = html;
-        this.isLoading = false;
-        this.$nextTick(() => this.afterRender());
+        const html = await this.parseMarkdown(text);
+        this.chapterCache[id] = html;
+        this.currentHtml = html;
+        this.loading = false;
+        this.replayChapterAnim();
+        this.$nextTick(() => window.scrollTo(0, 0));
+
+        const next = this.nextChapterMeta;
+        if (next && !this.chapterCache[next.id]) {
+          setTimeout(() => this.preloadChapter(next.id), 500);
+        }
       } catch (e) {
-        this.isLoading = false;
-        this.loadError = true;
-        this.chapterContent = "<p style='text-align:center;color:#dc2626;padding:2rem;'>章节加载失败，请检查是否通过 HTTP 服务器运行。</p>";
+        this.loading = false;
+        this.error = '加载章节 ' + id + ' 失败：' + e.message + '。请确认通过 HTTP 服务器访问（非 file://）。';
       }
     },
 
-    // ---------- 渲染后处理 ----------
-    afterRender() {
-      this.buildToc();
-      this.scrollToTop();
-      this.trackProgress();
-      const content = document.getElementById("article-content");
-      if (content) {
-        content.classList.add("fade-in");
+    async preloadChapter(id) {
+      if (this.chapterCache[id]) return;
+      const meta = this.chapters.find(c => c.id === id);
+      if (!meta) return;
+      try {
+        const resp = await fetch('bookcreater/' + meta.file);
+        if (!resp.ok) return;
+        const text = await resp.text();
+        const html = await this.parseMarkdown(text);
+        this.chapterCache[id] = html;
+      } catch (e) {
+        // 预加载失败静默忽略
       }
     },
 
-    // ---------- 章节导航 ----------
-    goToChapter(id) {
-      if (id === this.currentChapterId) {
-        this.mobileSidebarOpen = false;
-        return;
+    async parseMarkdown(text) {
+      const start = Date.now();
+      while (typeof marked === 'undefined' && Date.now() - start < 5000) {
+        await new Promise(r => setTimeout(r, 50));
       }
-      this.loadChapter(id);
-      this.mobileSidebarOpen = false;
+      if (typeof marked === 'undefined') {
+        return '<p style="color:red">marked.js 未加载，无法解析 markdown。请检查网络。</p><pre>' + this.escapeHtml(text) + '</pre>';
+      }
+      marked.setOptions({ breaks: false, gfm: true });
+      return marked.parse(text);
+    },
+
+    escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    },
+
+    toggleTheme() {
+      this.theme = this.theme === 'light' ? 'dark' : 'light';
+      if (this.theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('book-theme', this.theme);
+    },
+
+    setFont(delta) {
+      const next = this.fontSize + delta;
+      if (next < 10 || next > 20) return;
+      this.fontSize = next;
+      localStorage.setItem('book-fontsize', String(next));
+    },
+
+    get lineHeight() { return this.fontSize >= 16 ? 1.8 : 1.85; },
+
+    onScroll() {
+      if (this._scrollScheduled) return;
+      this._scrollScheduled = true;
+      requestAnimationFrame(() => {
+        const h = document.documentElement;
+        const scrollable = h.scrollHeight - h.clientHeight;
+        this.progress = scrollable > 0 ? Math.min(100, (h.scrollTop / scrollable) * 100) : 0;
+        this._scrollScheduled = false;
+      });
+    },
+
+    onKeydown(e) {
+      if (this.view !== 'read') return;
+      if (e.key === 'Escape') {
+        if (this.sidebarOpen) this.sidebarOpen = false;
+        else if (this.sidebarShow) this.sidebarShow = false;
+        else if (this.moreOpen) this.moreOpen = false;
+        else if (this.immersive) this.toggleImmersive();
+      } else if (e.key === 'i' || e.key === 'I') {
+        this.toggleImmersive();
+      } else if (e.key === 'ArrowLeft' && this.prevChapterMeta) {
+        this.prevChapter();
+      } else if (e.key === 'ArrowRight' && this.nextChapterMeta) {
+        this.nextChapter();
+      }
+    },
+
+    toggleImmersive() {
+      this.immersive = !this.immersive;
+      localStorage.setItem('book-immersive', this.immersive ? '1' : '0');
+      if (!this.immersive) {
+        this.sidebarShow = false;
+      }
+    },
+
+    openToc() {
+      if (window.innerWidth >= 1024) {
+        this.sidebarShow = !this.sidebarShow;
+      } else {
+        this.sidebarOpen = true;
+      }
     },
 
     prevChapter() {
-      const idx = CHAPTERS.findIndex(c => c.id === this.currentChapterId);
-      if (idx > 0) this.loadChapter(CHAPTERS[idx - 1].id);
+      if (this.prevChapterMeta) this.openChapter(this.prevChapterMeta.id);
     },
-
     nextChapter() {
-      const idx = CHAPTERS.findIndex(c => c.id === this.currentChapterId);
-      if (idx < CHAPTERS.length - 1) this.loadChapter(CHAPTERS[idx + 1].id);
+      if (this.nextChapterMeta) this.openChapter(this.nextChapterMeta.id);
     },
 
-    get hasPrev() {
-      return this.currentChapterId !== "00";
-    },
-
-    get hasNext() {
-      return this.currentChapterId !== "41";
-    },
-
-    // ---------- 分组 ----------
-    get groupedChapters() {
-      const groups = {};
-      CHAPTERS.forEach(c => {
-        if (!groups[c.part]) groups[c.part] = [];
-        groups[c.part].push(c);
-      });
-      return groups;
-    },
-
-    // ---------- TOC ----------
-    buildToc() {
-      const content = document.getElementById("article-content");
-      if (!content) return;
-      const heads = content.querySelectorAll("h2, h3");
-      const items = [];
-      heads.forEach((h, i) => {
-        const id = `toc-${i}`;
-        h.id = id;
-        items.push({
-          id: id,
-          text: h.textContent,
-          level: h.tagName.toLowerCase()
+    goAuthor() {
+      if (this.view === 'read') {
+        this.goHome();
+        this.$nextTick(() => {
+          requestAnimationFrame(() => this.scrollToAuthor());
         });
-      });
-      this.tocItems = items;
-    },
-
-    scrollToToc(id) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    },
-
-    // ---------- 阅读进度 ----------
-    trackProgress() {
-      const content = document.getElementById("article-content");
-      if (!content) return;
-      const onScroll = () => {
-        const rect = content.getBoundingClientRect();
-        const total = content.offsetHeight - window.innerHeight;
-        const scrolled = -rect.top;
-        this.readProgress = Math.max(0, Math.min(100, (scrolled / total) * 100));
-
-        // 更新 TOC 高亮
-        const heads = content.querySelectorAll("h2, h3");
-        let active = "";
-        heads.forEach(h => {
-          const r = h.getBoundingClientRect();
-          if (r.top < 120) active = h.id;
+      } else {
+        this.$nextTick(() => {
+          requestAnimationFrame(() => this.scrollToAuthor());
         });
-        if (active) this.activeTocId = active;
-      };
-      window.onscroll = onScroll;
-      onScroll();
-    },
-
-    // ---------- 沉浸式 ----------
-    toggleImmersive() {
-      this.immersiveMode = !this.immersiveMode;
-      if (this.immersiveMode) {
-        this.sidebarOpen = false;
-        this.tocOpen = false;
-        document.body.classList.add("immersive-mode");
-      } else {
-        document.body.classList.remove("immersive-mode");
       }
     },
 
-    // ---------- 主题 ----------
-    toggleTheme() {
-      this.theme = this.theme === "light" ? "dark" : "light";
-      this.applyTheme();
-      localStorage.setItem("sq-theme", this.theme);
+    scrollToAuthor() {
+      const el = document.getElementById('author');
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.pageYOffset - 64;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     },
-
-    applyTheme() {
-      if (this.theme === "dark") {
-        document.documentElement.classList.add("dark");
-        document.documentElement.classList.add("theme-dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        document.documentElement.classList.remove("theme-dark");
-      }
-    },
-
-    // ---------- 字号 ----------
-    setFontSize(size) {
-      this.fontSize = size;
-      localStorage.setItem("sq-fontsize", size);
-    },
-
-    get fontSizeClass() {
-      return `font-size-${this.fontSize}`;
-    },
-
-    // ---------- 键盘快捷键 ----------
-    setupKeyboard() {
-      document.addEventListener("keydown", (e) => {
-        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-        switch (e.key) {
-          case "ArrowLeft":
-            if (this.hasPrev) { e.preventDefault(); this.prevChapter(); }
-            break;
-          case "ArrowRight":
-            if (this.hasNext) { e.preventDefault(); this.nextChapter(); }
-            break;
-          case "f":
-          case "F":
-            e.preventDefault();
-            this.toggleImmersive();
-            break;
-          case "t":
-          case "T":
-            e.preventDefault();
-            this.toggleTheme();
-            break;
-          case "Escape":
-            if (this.immersiveMode) {
-              e.preventDefault();
-              this.toggleImmersive();
-            }
-            break;
-        }
-      });
-    },
-
-    // ---------- 工具 ----------
-    scrollToTop() {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    },
-
-    updateUrl() {
-      const url = new URL(window.location);
-      url.searchParams.set("chapter", this.currentChapterId);
-      window.history.replaceState({}, "", url);
-    },
-
-    get chapterLabel() {
-      if (!this.currentChapter) return "";
-      if (this.currentChapter.type === "preface") return "序言";
-      if (this.currentChapter.type === "epilogue") return "终章";
-      return `第 ${parseInt(this.currentChapter.id)} 章`;
-    },
-
-    get progressLabel() {
-      const idx = CHAPTERS.findIndex(c => c.id === this.currentChapterId);
-      return `${idx + 1} / ${CHAPTERS.length}`;
-    }
   };
 }
 
-/* ---------- 首页逻辑 ---------- */
-function homeApp() {
-  return {
-    theme: "light",
-    continueChapter: null,
-
-    init() {
-      this.theme = localStorage.getItem("sq-theme") || "light";
-      this.applyTheme();
-      const saved = localStorage.getItem("sq-current-chapter");
-      if (saved && saved !== "00") {
-        const ch = CHAPTERS.find(c => c.id === saved);
-        if (ch) this.continueChapter = ch;
-      }
-    },
-
-    toggleTheme() {
-      this.theme = this.theme === "light" ? "dark" : "light";
-      this.applyTheme();
-      localStorage.setItem("sq-theme", this.theme);
-    },
-
-    applyTheme() {
-      if (this.theme === "dark") {
-        document.documentElement.classList.add("dark");
-        document.documentElement.classList.add("theme-dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        document.documentElement.classList.remove("theme-dark");
-      }
-    },
-
-    get groupedChapters() {
-      const groups = {};
-      CHAPTERS.forEach(c => {
-        if (!groups[c.part]) groups[c.part] = [];
-        groups[c.part].push(c);
-      });
-      return groups;
-    },
-
-    startReading() {
-      window.location.href = "read.html?chapter=00";
-    },
-
-    continueReading() {
-      if (this.continueChapter) {
-        window.location.href = `read.html?chapter=${this.continueChapter.id}`;
-      }
-    },
-
-    goToChapter(id) {
-      window.location.href = `read.html?chapter=${id}`;
-    }
-  };
-}
+window.bookApp = bookApp;

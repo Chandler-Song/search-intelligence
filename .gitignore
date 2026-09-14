@@ -1,17 +1,16 @@
-# Python 缓存与脚本
+# 依赖
+node_modules/
 __pycache__/
 *.pyc
-*.pyo
-*.py
-gen_cover.py
-test_*.py
-verify_*.py
+
+# 构建产物
+dist/
+build/
 
 # 临时文件
-server_log.txt
 *.log
-NUL
 *.tmp
+server_log.txt
 
 # 系统文件
 Thumbs.db
@@ -22,7 +21,10 @@ desktop.ini
 .vscode/
 .idea/
 *.swp
-*.swo
 
-# 服务器进程
-*.pid
+# 环境变量
+.env
+.env.local
+
+# CodeArts 缓存
+.codeartsdoer/
